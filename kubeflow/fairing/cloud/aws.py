@@ -112,6 +112,55 @@ def add_aws_credentials(kube_manager, pod_spec, namespace):
         pod_spec.containers[0].env = env
 
 
+def add_aws_credentials_with_token(kube_manager, pod_spec, namespace):
+    """add AWS credential
+
+    :param kube_manager: kube manager for handles communication with Kubernetes' client
+    :param pod_spec: pod spec like volumes and security context
+    :param namespace: The custom resource
+
+    """
+    if not kube_manager.secret_exists(constants.AWS_CREDS_SECRET_NAME, namespace):
+        raise ValueError('Unable to mount credentials: Secret aws-secret not found in namespace {}'
+                         .format(namespace))
+
+    # Set appropriate secrets env to enable kubeflow-user service
+    # account.
+    env = [
+        client.V1EnvVar(
+            name='AWS_ACCESS_KEY_ID',
+            value_from=client.V1EnvVarSource(
+                secret_key_ref=client.V1SecretKeySelector(
+                    name=constants.AWS_CREDS_SECRET_NAME,
+                    key='AWS_ACCESS_KEY_ID'
+                )
+            )
+        ),
+        client.V1EnvVar(
+            name='AWS_SECRET_ACCESS_KEY',
+            value_from=client.V1EnvVarSource(
+                secret_key_ref=client.V1SecretKeySelector(
+                    name=constants.AWS_CREDS_SECRET_NAME,
+                    key='AWS_SECRET_ACCESS_KEY'
+                )
+            )
+        ),
+        client.V1EnvVar(
+            name='AWS_SESSION_TOKEN',
+            value_from=client.V1EnvVarSource(
+                secret_key_ref=client.V1SecretKeySelector(
+                    name=constants.AWS_CREDS_SECRET_NAME,
+                    key='AWS_SESSION_TOKEN'
+                )
+            )
+        )]
+
+    if pod_spec.containers[0].env:
+        pod_spec.containers[0].env.extend(env)
+    else:
+        pod_spec.containers[0].env = env
+
+
 def add_ecr_config(kube_manager, pod_spec, namespace):
     """add secret
 
