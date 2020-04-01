@@ -320,7 +320,7 @@ class AWSBackend(KubernetesBackend):
         return Job(namespace=self._namespace, pod_spec_mutators=pod_spec_mutators, annotations=annotations)
 
     def get_serving_deployer(self, model_class, service_type='ClusterIP', # pylint:disable=arguments-differ
-                             pod_spec_mutators=None):
+                             pod_spec_mutators=None, annotations=None):
         """Creates a deployer to be used with a serving job for AWS
 
         :param model_class: the name of the class that holds the predict function.
@@ -330,7 +330,7 @@ class AWSBackend(KubernetesBackend):
 
         """
         return Serving(model_class, namespace=self._namespace, service_type=service_type,
-                       pod_spec_mutators=pod_spec_mutators)
+                       pod_spec_mutators=pod_spec_mutators, annotations=annotations)
 
 
 class IBMCloudBackend(KubernetesBackend):
