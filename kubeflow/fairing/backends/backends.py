@@ -287,16 +287,16 @@ class AWSBackend(KubernetesBackend):
         # kube2iam role so injection of credentials should be avoided
         import re
 
-        def search(dictionary, search):
+        def search(dictionary, searchword):
             """
             :param dictionary: Dictionary in which you need to perform the search
-            :param search: word or part of word to search
+            :param searchword: word or part of word to search
             :return: Boolean True/False
             """
             search.a = []
             for key, value in dictionary.items():
-                match = re.search(r'{}'.format(search), key)
-                matchval = re.search(r'{}'.format(search), value)
+                match = re.search(r'{}'.format(searchword), key)
+                matchval = re.search(r'{}'.format(searchword), value)
                 if match or matchval:
                     return True
                 else:
