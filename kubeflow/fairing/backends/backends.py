@@ -287,7 +287,7 @@ class AWSBackend(KubernetesBackend):
                                                    needs_deps_installation,
                                                    pod_spec_mutators)
 
-    def get_training_deployer(self, pod_spec_mutators=None):
+    def get_training_deployer(self, pod_spec_mutators=None, annotations=None):
         """Creates a deployer to be used with a training job for AWS
 
         :param pod_spec_mutators: list of functions that is used to mutate the podsspec.
@@ -297,7 +297,7 @@ class AWSBackend(KubernetesBackend):
         """
         pod_spec_mutators = pod_spec_mutators or []
         pod_spec_mutators.append(aws.add_aws_credentials_if_exists)
-        return Job(namespace=self._namespace, pod_spec_mutators=pod_spec_mutators)
+        return Job(namespace=self._namespace, pod_spec_mutators=pod_spec_mutators, annotations=annotations)
 
     def get_serving_deployer(self, model_class, service_type='ClusterIP', # pylint:disable=arguments-differ
                              pod_spec_mutators=None):

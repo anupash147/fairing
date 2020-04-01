@@ -22,9 +22,11 @@ class BaseTask:
     """
 
     def __init__(self, entry_point, base_docker_image=None, docker_registry=None,
-                 input_files=None, backend=None, pod_spec_mutators=None):
+                 input_files=None, backend=None, pod_spec_mutators=None, annotations=None):
         self._backend = backend or KubernetesBackend()
         self._pod_spec_mutators = pod_spec_mutators or []
+        self._annotations = annotations
+
         input_files = input_files or []
         output_map = {}
 
@@ -72,15 +74,15 @@ class TrainJob(BaseTask):
     """Create a train job. """
 
     def __init__(self, entry_point, base_docker_image=None, docker_registry=None,  # pylint:disable=useless-super-delegation
-                 input_files=None, backend=None, pod_spec_mutators=None):
+                 input_files=None, backend=None, pod_spec_mutators=None, annotations=None):
         super().__init__(entry_point, base_docker_image, docker_registry,
-                         input_files, backend, pod_spec_mutators)
+                         input_files, backend, pod_spec_mutators, annotations=annotations)
 
     def submit(self):
         """Submit a train job. """
         self._build()
         deployer = self._backend.get_training_deployer(
-            pod_spec_mutators=self._pod_spec_mutators)
+            pod_spec_mutators=self._pod_spec_mutators, annotations=self._annotations)
         return deployer.deploy(self.pod_spec)
 
 
