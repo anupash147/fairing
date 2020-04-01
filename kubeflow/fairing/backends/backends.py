@@ -96,6 +96,7 @@ class KubernetesBackend(BackendInterface):
     """ Use to create a builder instance and create a deployer to be used with a traing job or
     a serving job for the Kubernetes.
     """
+
     def __init__(self, namespace=None, build_context_source=None):
         if not namespace and not utils.is_running_in_k8s():
             logger.warning("Can't determine namespace automatically. "
@@ -105,7 +106,8 @@ class KubernetesBackend(BackendInterface):
         self._namespace = namespace or utils.get_default_target_namespace()
         self._build_context_source = build_context_source
 
-    def get_builder(self, preprocessor, base_image, registry, needs_deps_installation=True,  # pylint:disable=arguments-differ
+    def get_builder(self, preprocessor, base_image, registry, needs_deps_installation=True,
+                    # pylint:disable=arguments-differ
                     pod_spec_mutators=None, annotations=None):
         """Creates a builder instance with right config for the given Kubernetes
 
@@ -151,7 +153,7 @@ class KubernetesBackend(BackendInterface):
         """
         return Job(self._namespace, pod_spec_mutators=pod_spec_mutators, annotations=annotations)
 
-    def get_serving_deployer(self, model_class, service_type='ClusterIP', # pylint:disable=arguments-differ
+    def get_serving_deployer(self, model_class, service_type='ClusterIP',  # pylint:disable=arguments-differ
                              pod_spec_mutators=None, annotations=None):
         """Creates a deployer to be used with a serving job for the Kubernetes
 
@@ -161,7 +163,7 @@ class KubernetesBackend(BackendInterface):
             (Default value = None)
 
         """
-        print("Annotations in serving deployer",annotations) #anupash debug
+        print("Annotations in serving deployer", annotations)  # anupash debug
         return Serving(model_class, namespace=self._namespace, service_type=service_type,
                        pod_spec_mutators=pod_spec_mutators, annotations=annotations)
 
@@ -284,22 +286,30 @@ class AWSBackend(KubernetesBackend):
         # if the annotations contains some sort of role, we assume that user is using
         # kube2iam role so injection of credentials should be avoided
         import re
-        def search(myDict, search1):
+
+        def search(dictionary, search):
+            """
+            :param dictionary: Dictionary in which you need to perform the search
+            :param search: word or part of word to search
+            :return: Boolean True/False
+            """
             search.a = []
-            for key, value in myDict.items():
-                match = re.search(r'{}'.format(search1), key)
-                matchVal = re.search(r'{}'.format(search1), value)
-                if match or matchVal:
+            for key, value in dictionary.items():
+                match = re.search(r'{}'.format(search), key)
+                matchval = re.search(r'{}'.format(search), value)
+                if match or matchval:
                     return True
+                else:
+                    return False
+
         if annotations:
-            rolepresent = search(annotations,'role')
+            rolepresent = search(annotations, 'role')
             if not rolepresent:
                 pod_spec_mutators.append(aws.add_aws_credentials_if_exists)
 
         if aws.is_ecr_registry(registry):
             pod_spec_mutators.append(aws.add_ecr_config)
             aws.create_ecr_registry(registry, constants.DEFAULT_IMAGE_NAME)
-        print("In AWSbackend and the annotation passed ", annotations)   # anup debug
         return super(AWSBackend, self).get_builder(preprocessor,
                                                    base_image,
                                                    registry,
@@ -319,7 +329,7 @@ class AWSBackend(KubernetesBackend):
         pod_spec_mutators.append(aws.add_aws_credentials_if_exists)
         return Job(namespace=self._namespace, pod_spec_mutators=pod_spec_mutators, annotations=annotations)
 
-    def get_serving_deployer(self, model_class, service_type='ClusterIP', # pylint:disable=arguments-differ
+    def get_serving_deployer(self, model_class, service_type='ClusterIP',  # pylint:disable=arguments-differ
                              pod_spec_mutators=None, annotations=None):
         """Creates a deployer to be used with a serving job for AWS
 
@@ -339,8 +349,8 @@ class IBMCloudBackend(KubernetesBackend):
     """
 
     def __init__(self, namespace=None, cos_endpoint_url=None, build_context_source=None):
-        build_context_source = build_context_source or\
-            cos_context.COSContextSource(namespace=namespace, cos_endpoint_url=cos_endpoint_url)
+        build_context_source = build_context_source or \
+                               cos_context.COSContextSource(namespace=namespace, cos_endpoint_url=cos_endpoint_url)
         super(IBMCloudBackend, self).__init__(namespace, build_context_source)
 
     def get_builder(self, preprocessor, base_image, registry, needs_deps_installation=True,
@@ -375,7 +385,7 @@ class IBMCloudBackend(KubernetesBackend):
         pod_spec_mutators = pod_spec_mutators or []
         return Job(namespace=self._namespace, pod_spec_mutators=pod_spec_mutators)
 
-    def get_serving_deployer(self, model_class, service_type='ClusterIP', # pylint:disable=arguments-differ
+    def get_serving_deployer(self, model_class, service_type='ClusterIP',  # pylint:disable=arguments-differ
                              pod_spec_mutators=None):
         """Creates a deployer to be used with a serving job for IBM Cloud
 
@@ -393,9 +403,10 @@ class AzureBackend(KubernetesBackend):
     """ Use to create a builder instance and create a deployer to be used with a traing job or
     a serving job for the Azure backend.
     """
+
     def __init__(self, namespace=None, build_context_source=None):
         build_context_source = (
-            build_context_source or azurestorage_context.StorageContextSource(namespace=namespace)
+                build_context_source or azurestorage_context.StorageContextSource(namespace=namespace)
         )
         super(AzureBackend, self).__init__(namespace, build_context_source)
 
@@ -424,6 +435,7 @@ class AzureBackend(KubernetesBackend):
                                                      needs_deps_installation,
                                                      pod_spec_mutators)
 
+
 class KubeflowBackend(KubernetesBackend):
     """Kubeflow backend refer to KubernetesBackend """
 
@@ -446,7 +458,7 @@ class KubeflowGKEBackend(GKEBackend):
 class KubeflowAWSBackend(AWSBackend):
     """Kubeflow for AWS backend refer to AWSBackend """
 
-    def __init__(self, namespace=None, build_context_source=None): # pylint:disable=useless-super-delegation
+    def __init__(self, namespace=None, build_context_source=None):  # pylint:disable=useless-super-delegation
         super(KubeflowAWSBackend, self).__init__(
             namespace, build_context_source)
 
@@ -454,7 +466,7 @@ class KubeflowAWSBackend(AWSBackend):
 class KubeflowAzureBackend(AzureBackend):
     """Kubeflow for Azure backend refer to AzureBackend """
 
-    def __init__(self, namespace=None, build_context_source=None): # pylint:disable=useless-super-delegation
+    def __init__(self, namespace=None, build_context_source=None):  # pylint:disable=useless-super-delegation
         super(KubeflowAzureBackend, self).__init__(namespace, build_context_source)
 
 
@@ -462,6 +474,7 @@ class GCPManagedBackend(BackendInterface):
     """ Use to create a builder instance and create a deployer to be used with a traing job
     or a serving job for the GCP.
     """
+
     def __init__(self, project_id=None, region=None, training_scale_tier=None,
                  job_config=None, use_stream_logs=False):
         """Creates an instance of GCPManagedBackend
@@ -486,7 +499,8 @@ class GCPManagedBackend(BackendInterface):
         self._job_config = job_config
         self._use_stream_logs = use_stream_logs
 
-    def get_builder(self, preprocessor, base_image, registry, needs_deps_installation=True,  # pylint:disable=arguments-differ
+    def get_builder(self, preprocessor, base_image, registry, needs_deps_installation=True,
+                    # pylint:disable=arguments-differ
                     pod_spec_mutators=None):
         """Creates a builder instance with right config for GCP
 
@@ -536,7 +550,7 @@ class GCPManagedBackend(BackendInterface):
         return GCPJob(self._project_id, self._region, self._training_scale_tier,
                       self._job_config, self._use_stream_logs)
 
-    def get_serving_deployer(self, model_class, pod_spec_mutators=None): # pylint:disable=arguments-differ
+    def get_serving_deployer(self, model_class, pod_spec_mutators=None):  # pylint:disable=arguments-differ
         """Creates a deployer to be used with a serving job for GCP
 
         :param model_class: the name of the class that holds the predict function.

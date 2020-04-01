@@ -43,7 +43,6 @@ class ClusterBuilder(BaseBuilder):
         self.annotations = annotations
         self.namespace = namespace or utils.get_default_target_namespace()
         self.cleanup = cleanup
-        print(self.annotations) #anup debug
 
     def build(self):
         logging.info("Building image using cluster builder.")
@@ -67,11 +66,10 @@ class ClusterBuilder(BaseBuilder):
         for fn in self.pod_spec_mutators:
             fn(self.manager, pod_spec, self.namespace)
         # implementing annotations
-        print("Annotations passed to clusterBuilder --> build", self.annotations)
         annotate = {"sidecar.istio.io/inject": "false"}
         if self.annotations:
             annotate.update(self.annotations)
-        print("annotations added to build {}".format(annotate))
+
         pod_spec_template = client.V1PodTemplateSpec(
             metadata=client.V1ObjectMeta(
                 generate_name="fairing-builder-",
