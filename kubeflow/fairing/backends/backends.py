@@ -265,7 +265,7 @@ class AWSBackend(KubernetesBackend):
         super(AWSBackend, self).__init__(namespace, build_context_source)
 
     def get_builder(self, preprocessor, base_image, registry, needs_deps_installation=True,
-                    pod_spec_mutators=None):
+                    pod_spec_mutators=None, annotations=None):
         """Creates a builder instance with right config for AWS
 
         :param preprocessor: Preprocessor to use to modify inputs
@@ -287,7 +287,8 @@ class AWSBackend(KubernetesBackend):
                                                    base_image,
                                                    registry,
                                                    needs_deps_installation,
-                                                   pod_spec_mutators)
+                                                   pod_spec_mutators,
+                                                   annotations)
 
     def get_training_deployer(self, pod_spec_mutators=None, annotations=None):
         """Creates a deployer to be used with a training job for AWS
