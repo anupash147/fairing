@@ -280,7 +280,21 @@ class AWSBackend(KubernetesBackend):
 
         """
         pod_spec_mutators = pod_spec_mutators or []
-        pod_spec_mutators.append(aws.add_aws_credentials_if_exists)
+        # if the annotations contains some sort of role, we assume that user is using
+        # kube2iam role so injection of credentials should be avoided
+        import re
+        def search(myDict, search1):
+            search.a = []
+            for key, value in myDict.items():
+                match = re.search(r'{}'.format(search1), key)
+                matchVal = re.search(r'{}'.format(search1), value)
+                if match or matchVal:
+                    return True
+        if annotations:
+            rolepresent = search(annotations,'role')
+            if not rolepresent:
+                pod_spec_mutators.append(aws.add_aws_credentials_if_exists)
+
         if aws.is_ecr_registry(registry):
             pod_spec_mutators.append(aws.add_ecr_config)
             aws.create_ecr_registry(registry, constants.DEFAULT_IMAGE_NAME)
