@@ -91,11 +91,12 @@ class PredictionEndpoint(BaseTask):
     """Create a prediction endpoint. """
 
     def __init__(self, model_class, base_docker_image=None, docker_registry=None, input_files=None,
-                 backend=None, service_type='ClusterIP', pod_spec_mutators=None):
+                 backend=None, service_type='ClusterIP', pod_spec_mutators=None, annotations=None):
         self.model_class = model_class
         self.service_type = service_type
+        self.annotations=annotations
         super().__init__(model_class, base_docker_image, docker_registry,
-                         input_files, backend, pod_spec_mutators)
+                         input_files, backend, pod_spec_mutators, annotations)
 
     def create(self):
         """Create prediction endpoint. """
@@ -104,7 +105,8 @@ class PredictionEndpoint(BaseTask):
         self._deployer = self._backend.get_serving_deployer(
             self.model_class.__name__,
             service_type=self.service_type,
-            pod_spec_mutators=self._pod_spec_mutators)
+            pod_spec_mutators=self._pod_spec_mutators,
+            annotations=self.annotations)
         self.url = self._deployer.deploy(self.pod_spec)
         logger.warning("Prediction endpoint: {}".format(self.url))
 

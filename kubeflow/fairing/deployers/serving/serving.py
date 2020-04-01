@@ -15,7 +15,7 @@ class Serving(Job):
     """Serves a prediction endpoint using Kubernetes deployments and services"""
 
     def __init__(self, serving_class, namespace=None, runs=1, labels=None,
-                 service_type="ClusterIP", pod_spec_mutators=None):
+                 service_type="ClusterIP", pod_spec_mutators=None, annotations=None):
         """
 
         :param serving_class: the name of the class that holds the predict function.
@@ -27,7 +27,7 @@ class Serving(Job):
         """
         super(Serving, self).__init__(namespace, runs,
                                       deployer_type=constants.SERVING_DEPLOPYER_TYPE,
-                                      labels=labels)
+                                      labels=labels, annotations=annotations)
         self.serving_class = serving_class
         self.service_type = service_type
         self.pod_spec_mutators = pod_spec_mutators or []
