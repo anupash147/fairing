@@ -43,6 +43,7 @@ class ClusterBuilder(BaseBuilder):
         self.annotations = annotations
         self.namespace = namespace or utils.get_default_target_namespace()
         self.cleanup = cleanup
+        print(self.annotations) #anup debug
 
     def build(self):
         logging.info("Building image using cluster builder.")

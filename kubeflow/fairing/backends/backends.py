@@ -268,6 +268,7 @@ class AWSBackend(KubernetesBackend):
                     pod_spec_mutators=None, annotations=None):
         """Creates a builder instance with right config for AWS
 
+        :param annotations: Adding annotations to the training job useful for kube2iam implementation
         :param preprocessor: Preprocessor to use to modify inputs
         :param base_image: Base image to use for this job
         :param registry: Registry to push image to. Example: gcr.io/kubeflow-images
@@ -283,6 +284,7 @@ class AWSBackend(KubernetesBackend):
         if aws.is_ecr_registry(registry):
             pod_spec_mutators.append(aws.add_ecr_config)
             aws.create_ecr_registry(registry, constants.DEFAULT_IMAGE_NAME)
+        print("In AWSbackend and the annotation passed ", annotations)   # anup debug
         return super(AWSBackend, self).get_builder(preprocessor,
                                                    base_image,
                                                    registry,
