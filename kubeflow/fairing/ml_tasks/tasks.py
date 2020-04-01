@@ -76,7 +76,7 @@ class TrainJob(BaseTask):
     def __init__(self, entry_point, base_docker_image=None, docker_registry=None,  # pylint:disable=useless-super-delegation
                  input_files=None, backend=None, pod_spec_mutators=None, annotations=None):
         super().__init__(entry_point, base_docker_image, docker_registry,
-                         input_files, backend, pod_spec_mutators, annotations=annotations)
+                         input_files, backend, pod_spec_mutators, annotations)
 
     def submit(self):
         """Submit a train job. """
