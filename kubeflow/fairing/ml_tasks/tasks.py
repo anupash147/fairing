@@ -60,6 +60,7 @@ class BaseTask:
                                                  base_image=self.base_docker_image,
                                                  registry=self.docker_registry,
                                                  pod_spec_mutators=self._pod_spec_mutators,
+                                                 annotations=self._annotations,
                                                  needs_deps_installation=needs_deps_installation)
         logger.warning("Using builder: {}".format(type(self.builder)))
 

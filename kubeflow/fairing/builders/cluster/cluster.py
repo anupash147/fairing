@@ -24,6 +24,7 @@ class ClusterBuilder(BaseBuilder):
                  push=True,
                  base_image=constants.DEFAULT_BASE_IMAGE,
                  pod_spec_mutators=None,
+                 annotations=None,
                  namespace=None,
                  dockerfile_path=None,
                  cleanup=False):
@@ -39,6 +40,7 @@ class ClusterBuilder(BaseBuilder):
             raise RuntimeError("context_source is not specified")
         self.context_source = context_source
         self.pod_spec_mutators = pod_spec_mutators or []
+        self.annotations = annotations
         self.namespace = namespace or utils.get_default_target_namespace()
         self.cleanup = cleanup
 
@@ -63,13 +65,17 @@ class ClusterBuilder(BaseBuilder):
             self.image_tag, self.push)
         for fn in self.pod_spec_mutators:
             fn(self.manager, pod_spec, self.namespace)
-
+        # implementing annotations
+        annotate = {"sidecar.istio.io/inject": "false"}
+        if not self.annotations:
+            annotate.update(self.annotations)
+        print("annotations added to build {}".format(annotate))
         pod_spec_template = client.V1PodTemplateSpec(
             metadata=client.V1ObjectMeta(
                 generate_name="fairing-builder-",
                 labels=labels,
                 namespace=self.namespace,
-                annotations={"sidecar.istio.io/inject": "false"},
+                annotations=annotate,
             ),
             spec=pod_spec
         )

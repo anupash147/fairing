@@ -106,7 +106,7 @@ class KubernetesBackend(BackendInterface):
         self._build_context_source = build_context_source
 
     def get_builder(self, preprocessor, base_image, registry, needs_deps_installation=True,  # pylint:disable=arguments-differ
-                    pod_spec_mutators=None):
+                    pod_spec_mutators=None, annotations=None):
         """Creates a builder instance with right config for the given Kubernetes
 
         :param preprocessor: Preprocessor to use to modify inputs
@@ -117,6 +117,7 @@ class KubernetesBackend(BackendInterface):
                                   e.g. fairing.cloud.gcp.add_gcp_credentials_if_exists
                                   This can used to set things like volumes and security context.
                                   (Default value =None)
+        :param annotations: annotation object eg {"foo":"bar"}
 
         """
         if not needs_deps_installation:
@@ -128,6 +129,7 @@ class KubernetesBackend(BackendInterface):
                                   base_image=base_image,
                                   registry=registry,
                                   pod_spec_mutators=pod_spec_mutators,
+                                  annotations=annotations,
                                   namespace=self._namespace,
                                   context_source=self._build_context_source)
         elif ml_tasks_utils.is_docker_daemon_exists():
@@ -139,7 +141,7 @@ class KubernetesBackend(BackendInterface):
             raise RuntimeError(
                 "Not able to guess the right builder for this job!")
 
-    def get_training_deployer(self, pod_spec_mutators=None):
+    def get_training_deployer(self, pod_spec_mutators=None, annotations=None):
         """Creates a deployer to be used with a training job for the Kubernetes
 
         :param pod_spec_mutators: list of functions that is used to mutate the podsspec.
@@ -147,7 +149,7 @@ class KubernetesBackend(BackendInterface):
         :returns: job for handle all the k8s' template building for a training
 
         """
-        return Job(self._namespace, pod_spec_mutators=pod_spec_mutators)
+        return Job(self._namespace, pod_spec_mutators=pod_spec_mutators,annotations=annotations)
 
     def get_serving_deployer(self, model_class, service_type='ClusterIP', # pylint:disable=arguments-differ
                              pod_spec_mutators=None):
