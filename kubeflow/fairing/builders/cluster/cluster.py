@@ -67,8 +67,9 @@ class ClusterBuilder(BaseBuilder):
         for fn in self.pod_spec_mutators:
             fn(self.manager, pod_spec, self.namespace)
         # implementing annotations
+        print("Annotations passed to clusterBuilder --> build", self.annotations)
         annotate = {"sidecar.istio.io/inject": "false"}
-        if not self.annotations:
+        if self.annotations:
             annotate.update(self.annotations)
         print("annotations added to build {}".format(annotate))
         pod_spec_template = client.V1PodTemplateSpec(
