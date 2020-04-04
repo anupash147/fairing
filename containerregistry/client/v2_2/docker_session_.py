@@ -66,7 +66,6 @@ class Push(object):
       ValueError: an incorrectly typed argument was supplied.
     """
     self._name = name
-    print("Docker registry name ->",self._name.registry)
     self._transport = docker_http.Transport(name, creds, transport,
                                             docker_http.PUSH)
     self._mount = mount
