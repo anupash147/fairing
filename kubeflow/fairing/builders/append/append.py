@@ -76,8 +76,9 @@ class AppendBuilder(BaseBuilder):
 
     def _push(self, transport, src, img, dst):
         creds = docker_creds.DefaultKeychain.Resolve(dst)
+        print("aash - creds ->",creds)
         with docker_session.Push(dst, creds, transport,
-                                 mount=[src.as_repository()]) as session:
+                                 mount=[src.as_repository()],threads=1) as session:
             logger.warning("Uploading {}".format(self.image_tag))
             session.upload(img)
         os.remove(self.context_file)
